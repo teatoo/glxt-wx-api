@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>继教学时查询</title>
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <style type="text/css">
+    </style>
+</head>
+
+
+<body role="document" youdao="bind">
+<!-- Fixed navbar -->
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">继教学时查询</a>
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+</nav>
+<div class="container theme-showcase" role="main">
+    <br>
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+<!--    <div class="page-header">
+        <h3>继教学时查询</h3>
+    </div>-->
+	<div class="page-header">
+		<span id="span_info" class="text-primary"></span><br>
+		<span id="span_tongji" class="text-primary">统计信息</span>
+	</div>
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table table-striped" id="datas">
+                <thead>
+                <tr>
+                    <th><small>开始时间</small></th>
+                    <th><small>结束时间</small></th>
+                    <th><small>培训名称</small></th>
+                    <th><small>灵活</small></th>
+                    <th><small>规范</small></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr id="mytemplate">
+                    <td><small  id="start"></small></td>
+                    <td><small  id="end"></small></td>
+                    <td><small  id="name"></small></td>
+                    <td><small  id="Creditb"></small></td>
+                    <td><small  id="Credita"></small></td>
+                </tr>
+				</tbody>
+            </table>
+
+        </div>
+    </div>
+    <button type="button" class="btn btn-danger" onclick='window.history.back(-1)'>返回</button>
+</div>
+
+<!-- /container -->
+<script src="static/js/jquery-3.2.1.min.js"></script>
+<script src="static/js/bootstrap.min.js"></script>
+<script>
+	
+    $(function () {
+        queryInfo();
+		setTotalInfo();
+    });
+
+    function queryInfo() {
+        $(".myrow").remove();
+        $.ajax({
+            type: "GET",//使用get方法访问后台
+            dataType: "JSON",//返回json格式的数据
+            url: "/periodInfo",//要访问的后台地址
+			//发送给数据库的数据
+			data:{
+			   queryName:sessionStorage.queryName,
+			   idCard:sessionStorage.idCard,
+			   startTime:sessionStorage.startTime,
+			   endtTime:sessionStorage.endtTime	
+		   	},
+            cache: false,
+			
+            success: function (msg) {//msg为返回的数据，在这里做数据绑定
+                console.log(msg.length);
+				var totalA;
+				var totalB;
+				totalA = 0;
+				totalB = 0;
+                $("#mytemplate").show();
+                $.each(msg, function (i, n) {
+                    var row = $("#mytemplate").clone();
+                    row.addClass("myrow");
+                    row.find("#start").text(n.start);
+                    row.find("#end").text(n.end);
+                    row.find("#name").text(n.name);
+                    row.find("#Creditb").text(n.creditb);
+                    row.find("#Credita").text(n.credita);
+					row.appendTo("#datas");//添加到模板的容器中
+					totalA = totalA + n.credita
+					totalB = totalB + n.creditb
+
+                });
+				$("#mytemplate").hide();   //隐藏模板
+				console.log(totalA)
+				console.log(totalB)
+				$("#span_tongji").html("共计培训" + msg.length + "次;&nbsp&nbsp&nbsp灵活性" + totalB + "学时;&nbsp&nbsp&nbsp规范性" + totalA + "学时");
+				//sessionStorage.setInfo = "共计培训" + msg.length + "次;灵活性" + totalB + "学时;规范性" + totalA + "学时";
+            },
+            error: function () {
+                alert("连接服务器错误");
+            }
+        });
+    }
+     function setTotalInfo() {
+    			$("#span_info").html("姓名:" + sessionStorage.queryName + "&nbsp&nbsp&nbsp&nbsp身份证:" + sessionStorage.idCard);
+     }
+</script>
+</body>
+
+</html>
